@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Estoque Smart</title>
+
+<style>
+
+body{background:#141c18;color:white;font-family:Arial;padding:25px;text-align:center}
+
+h1{color:#c5f477}
+
+input,button{box-sizing:border-box;width:100%;padding:15px;margin:8px 0;border-radius:12px;border:0;font-size:16px}
+
+button{background:#c5f477;color:#141c18;font-weight:bold}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🏠 Estoque Smart</h1>
+
+<p>Sua casa conectada. Sua rotina simplificada.</p>
+
+<form id="login">
+
+<input id="email" type="email" placeholder="Seu e-mail" required>
+
+<input id="senha" type="password" placeholder="Sua senha" required>
+
+<button>Entrar</button>
+
+</form>
+
+<p id="status">Conectando...</p>
+
+<button id="sair" hidden>Sair</button>
+
+<script type="module">
+
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+
+import {getFirestore,doc,getDoc} from "https://www.gst
