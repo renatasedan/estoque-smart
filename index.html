@@ -1,53 +1,93 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Estoque Smart</title>
-
 <style>
-
-body{background:#141c18;color:white;font-family:Arial;padding:25px;text-align:center}
-
+body{background:#141c18;color:white;font-family:Arial,sans-serif;padding:25px;text-align:center}
 h1{color:#c5f477}
-
 input,button{box-sizing:border-box;width:100%;padding:15px;margin:8px 0;border-radius:12px;border:0;font-size:16px}
-
 button{background:#c5f477;color:#141c18;font-weight:bold}
-
+button:disabled{opacity:.5}
+[hidden]{display:none!important}
+#status{margin-top:20px;line-height:1.5}
 </style>
-
 </head>
-
 <body>
-
 <h1>🏠 Estoque Smart</h1>
-
 <p>Sua casa conectada. Sua rotina simplificada.</p>
-
 <form id="login">
-
 <input id="email" type="email" placeholder="Seu e-mail" required>
-
 <input id="senha" type="password" placeholder="Sua senha" required>
-
-<button>Entrar</button>
-
+<button id="entrar" disabled>Entrar</button>
 </form>
-
 <p id="status">Conectando...</p>
-
 <button id="sair" hidden>Sair</button>
-
 <script type="module">
-
-import {initializeApp} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-
-import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
-
-import {getFirestore,doc,getDoc} from "https://www.gst
+const status = document.getElementById("status");
+const login = document.getElementById("login");
+const entrar = document.getElementById("entrar");
+const sair = document.getElementById("sair");
+const aviso = setTimeout(() => {
+  status.textContent = "A conexão está demorando. Verifique sua internet.";
+}, 15000);
+try {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js");
+  const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js");
+  const { getFirestore, doc, getDocFromServer } = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js");
+  const firebaseConfig = {
+    apiKey: "AIzaSyDtl3jsIWUny6wSToLoREErgGKLg-bNj3k",
+    authDomain: "casa-smart-683e3.firebaseapp.com",
+    projectId: "casa-smart-683e3",
+    appId: "1:705985701779:web:b522be17a5faef0642aa66"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  onAuthStateChanged(auth, async (user) => {
+    clearTimeout(aviso);
+    if (user) {
+      login.hidden = true;
+      sair.hidden = false;
+      status.textContent = "Login realizado! Verificando banco de dados...";
+      try {
+        await getDocFromServer(doc(db, "estoqueSmart", "teste"));
+        status.textContent = "✅ Login realizado com sucesso! Banco de dados conectado.";
+      } catch (erro) {
+        status.textContent = "Login realizado, mas houve um erro no banco: " + erro.code;
+      }
+    } else {
+      login.hidden = false;
+      sair.hidden = true;
+      entrar.disabled = false;
+      status.textContent = "✅ Firebase conectado. Faça seu login.";
+    }
+  }, (erro) => {
+    clearTimeout(aviso);
+    status.textContent = "Erro de autenticação: " + erro.message;
+  });
+  login.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    entrar.disabled = true;
+    status.textContent = "Entrando...";
+    try {
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+      await signInWithEmailAndPassword(auth, email, senha);
+    } catch (erro) {
+      status.textContent = "Erro no login: " + erro.code;
+      entrar.disabled = false;
+    }
+  });
+  sair.addEventListener("click", async () => {
+    try { await signOut(auth); }
+    catch (erro) { status.textContent = "Erro ao sair: " + erro.message; }
+  });
+} catch (erro) {
+  clearTimeout(aviso);
+  status.textContent = "❌ Erro ao conectar: " + erro.message;
+}
+</script>
+</body>
+</html>
